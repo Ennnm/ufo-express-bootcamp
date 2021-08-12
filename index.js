@@ -22,29 +22,32 @@ const acceptCreation = (req, res) => {
   const obj = req.body;
   obj.date_time = `${obj.date} ${obj.time}`;
   obj.reported = new Date();
-  ['date', 'time'].forEach((k) => delete obj[k]);
-  add('data.json', 'sightings', obj, (msg) => {
+  add('newSmallData.json', 'sightings', obj, (msg) => {
     console.log(msg);
-    read('data.json', (err, data) => {
+    read('newSmallData.json', (err, data) => {
       const { sightings } = data;
       res.redirect(`/sighting/${sightings.length - 1}`);
     });
   });
 };
+const splitDateTime = (dateTime) => dateTime.split('T');
 const renderSight = (req, res) => {
-  read('data.json', (err, data) => {
+  read('newSmallData.json', (err, data) => {
     const { index } = req.params;
     const obj = {
       ...data.sightings[index],
       index,
       numEntries: data.sightings.length,
     };
+    [obj.date, obj.time] = splitDateTime(obj.date_time);
     res.render('sighting', obj);
   });
 };
 
 const renderSights = (req, res) => {
-  read('data.json', (err, data) => {
+  read('newSmallData.json', (err, data) => {
+    const { sightings } = data;
+    sightings.forEach((obj) => { [obj.date, obj.time] = splitDateTime(obj.date_time); });
     res.render('index', data);
   });
 };
@@ -63,11 +66,11 @@ const formatDateString = (dateStr) => {
 };
 const renderEditForm = (req, res) => {
   // read
-  read('data.json', (err, data) => {
+  read('newSmallData.json', (err, data) => {
     const { index } = req.params;
     const currObj = data.sightings[index];
     // date reformatting
-    [currObj.date, currObj.time] = currObj.date_time.split(' ');
+    [currObj.date, currObj.time] = currObj.date_time.split('T');
     currObj.date = formatDateString(currObj.date);
 
     const obj = {
@@ -80,7 +83,7 @@ const renderEditForm = (req, res) => {
 };
 
 const acceptEdit = (req, res) => {
-  read('data.json', (err, data) => {
+  read('newSmallData.json', (err, data) => {
     const { index } = req.params;
 
     data.sightings[index] = {
@@ -88,7 +91,7 @@ const acceptEdit = (req, res) => {
       date_time: `${req.body.date} ${req.body.time}`,
     };
     console.log(data.sightings[index]);
-    write('data.json', data, (err) => {
+    write('newbignewSmallData.json', data, (err) => {
       if (err) console.log('write error');
       res.redirect(`/sighting/${index}`);
     });
@@ -96,11 +99,11 @@ const acceptEdit = (req, res) => {
 };
 
 const acceptDelete = (req, res) => {
-  read('data.json', (err, data) => {
+  read('newSmallData.json', (err, data) => {
     const { index } = req.params;
     data.sightings.splice(index, 1);
     console.log(index);
-    write('data.json', data, (err) => {
+    write('newSmallData.json', data, (err) => {
       if (err) console.log('write error');
       res.redirect('/');
     });
@@ -108,9 +111,10 @@ const acceptDelete = (req, res) => {
 };
 
 const renderShapes = (req, res) => {
-  read('data.json', (err, data) => {
+  read('newSmallData.json', (err, data) => {
     const { sightings } = data;
-    const shapeArr = sightings.map((sight) => sight.shape);
+    let shapeArr = sightings.map((sight) => sight.shape);
+    shapeArr = shapeArr.filter((shape) => shape !== '');
     const shapeObjs = {
       shapes: new Set(shapeArr),
     };
@@ -119,10 +123,11 @@ const renderShapes = (req, res) => {
 };
 
 const renderOneShape = (req, res) => {
-  read('data.json', (err, data) => {
+  read('newSmallData.json', (err, data) => {
     const { shape } = req.params;
     const { sightings } = data;
     const sights = sightings.filter((x) => x.shape === shape);
+    sights.forEach((obj) => { [obj.date, obj.time] = splitDateTime(obj.date_time); });
     const shapeObjs = {
       sightings: sights,
     };
