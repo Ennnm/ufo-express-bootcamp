@@ -11,12 +11,11 @@ app.use(express.static('public'));
 // overrid POST req with query param ?_method=PUT to be PUT requests
 
 const splitDateTime = (dateTime) => dateTime.split('T');
-const isDateInFuture = (dateTime) => {
+const isDateInFuture = (date, time) => {
+  const dateTime = [date, time].join('T');
   const testDate = new Date(dateTime);
   const now = new Date();
   const elapsed = now - testDate;
-  console.log(`elapsed: ${testDate}`);
-  console.log(`elapsed: ${elapsed}`);
   return elapsed < 0;
 };
 
@@ -35,9 +34,7 @@ const isInputInvalid = (obj) => {
     dateInFuture: true,
     err: '',
   };
-  console.log(obj);
-  console.log(`date time ${obj.date_time}`);
-  if (isDateInFuture(obj.date_time))
+  if (isDateInFuture(obj.date, obj.time))
   {
     alertObj.dateInFuture = true;
     alertObj.err = 'Inserted date, time is in the future.\n';
@@ -135,16 +132,13 @@ const renderEditForm = (req, res) => {
 const acceptEdit = (req, res) => {
   const { index } = req.params;
   const obj = req.body;
-  console.log(isInputInvalid(obj));
   if (isInputInvalid(obj))
   {
-    console.log('edit input is invalid');
     const alertObj = {
       ...isInputInvalid(obj),
       title: 'Edit',
       action: `/sighting/${index}/edit?_method=PUT`,
     };
-    console.log('in input is inval;id');
     res.render('edit', alertObj);
     return;
   }
@@ -153,11 +147,10 @@ const acceptEdit = (req, res) => {
       ...obj,
       date_time: [obj.date, obj.time].join('T'),
     };
-    console.log('in read');
-    console.log(isInputInvalid(obj));
+    console.log('in edit read');
     write('newSmallData.json', data, (err) => {
       if (err) console.log('write error');
-      console.log('in write');
+      console.log('in edit write');
       console.log(data.sightings[index]);
 
       res.redirect(`/sighting/${index}`);
