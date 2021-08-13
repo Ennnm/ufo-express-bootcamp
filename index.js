@@ -10,27 +10,76 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static('public'));
 // overrid POST req with query param ?_method=PUT to be PUT requests
 
+const splitDateTime = (dateTime) => dateTime.split('T');
+const isDateInFuture = (dateTime) => {
+  const testDate = new Date(dateTime);
+  const now = new Date();
+  const elapsed = now - testDate;
+  console.log(`elapsed: ${testDate}`);
+  console.log(`elapsed: ${elapsed}`);
+  return elapsed < 0;
+};
+
 const renderCreateForm = (req, res) => {
   console.log('rendering form');
   const emptyObj = {
+    title: 'New sighting',
+    action: '/sighting',
   };
-  console.log(emptyObj);
-  res.render('creation');
+  res.render('edit', emptyObj);
 };
-
+const isInputInvalid = (obj) => {
+  // date check
+  const alertObj = {
+    ...obj,
+    dateInFuture: true,
+    err: '',
+  };
+  console.log(obj);
+  console.log(`date time ${obj.date_time}`);
+  if (isDateInFuture(obj.date_time))
+  {
+    alertObj.dateInFuture = true;
+    alertObj.err = 'Inserted date, time is in the future.\n';
+  }
+  const keys = Object.keys(obj);
+  const emptyKeys = keys.filter((key) => obj[key] === '');
+  if (emptyKeys.length === 1) {
+    alertObj.err += `${emptyKeys[0]} is empty`;
+  }
+  else if (emptyKeys.length !== 0) {
+    alertObj.err += `${emptyKeys.join(', ')} are empty`;
+  }
+  if (alertObj.err !== '')
+  {
+    console.log(alertObj.err);
+    return alertObj;
+  }
+};
 const acceptCreation = (req, res) => {
   const obj = req.body;
-  obj.date_time = `${obj.date} ${obj.time}`;
+  obj.date_time = [obj.date, obj.time].join('T');
   obj.reported = new Date();
+  // date check
+  if (isInputInvalid(obj))
+  {
+    const alertObj = {
+      ...isInputInvalid(obj),
+      title: 'New sighting',
+      action: '/sighting',
+    };
+    res.render('edit', alertObj);
+    return;
+  }
+
   add('newSmallData.json', 'sightings', obj, (msg) => {
-    console.log(msg);
     read('newSmallData.json', (err, data) => {
       const { sightings } = data;
       res.redirect(`/sighting/${sightings.length - 1}`);
     });
   });
 };
-const splitDateTime = (dateTime) => dateTime.split('T');
+
 const renderSight = (req, res) => {
   read('newSmallData.json', (err, data) => {
     const { index } = req.params;
@@ -74,25 +123,43 @@ const renderEditForm = (req, res) => {
     currObj.date = formatDateString(currObj.date);
 
     const obj = {
+      title: 'Edit',
+      action: `/sighting/${index}/edit?_method=PUT`,
       ...currObj,
-      index,
     };
-    console.log(`${obj} in edit form`);
+    console.log(obj);
     res.render('edit', obj);
   });
 };
 
 const acceptEdit = (req, res) => {
-  read('newSmallData.json', (err, data) => {
-    const { index } = req.params;
-
-    data.sightings[index] = {
-      ...req.body,
-      date_time: `${req.body.date} ${req.body.time}`,
+  const { index } = req.params;
+  const obj = req.body;
+  console.log(isInputInvalid(obj));
+  if (isInputInvalid(obj))
+  {
+    console.log('edit input is invalid');
+    const alertObj = {
+      ...isInputInvalid(obj),
+      title: 'Edit',
+      action: `/sighting/${index}/edit?_method=PUT`,
     };
-    console.log(data.sightings[index]);
-    write('newbignewSmallData.json', data, (err) => {
+    console.log('in input is inval;id');
+    res.render('edit', alertObj);
+    return;
+  }
+  read('newSmallData.json', (err, data) => {
+    data.sightings[index] = {
+      ...obj,
+      date_time: [obj.date, obj.time].join('T'),
+    };
+    console.log('in read');
+    console.log(isInputInvalid(obj));
+    write('newSmallData.json', data, (err) => {
       if (err) console.log('write error');
+      console.log('in write');
+      console.log(data.sightings[index]);
+
       res.redirect(`/sighting/${index}`);
     });
   });
