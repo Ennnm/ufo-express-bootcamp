@@ -1,6 +1,7 @@
 import express from 'express';
 import methodOverride from 'method-override';
 import cookieParser from 'cookie-parser';
+import moment from 'moment';
 import { read, add, write } from './jsonFileStorage.mjs';
 
 const app = express();
@@ -59,6 +60,7 @@ const acceptCreation = (req, res) => {
   const obj = req.body;
   obj.date_time = [obj.date, obj.time].join('T');
   obj.reported = new Date();
+
   // date check
   if (isInputInvalid(obj))
   {
@@ -80,25 +82,86 @@ const acceptCreation = (req, res) => {
   });
 };
 
+const favCookieHandler = (req, res) => {
+  const { fav } = req.query;
+  const { index } = req.params;
+  let favs = [];
+
+  if (req.cookies.fav)
+  {
+    favs = req.cookies.fav;
+  }
+  if (fav === 'true')
+  {
+    if (favs.indexOf(index) < 0) {
+      favs.push(index);
+    }
+  }
+  else if (fav === 'false')
+  {
+    if (favs.indexOf(index) >= 0) {
+      favs.splice(favs.indexOf(index), 1);
+    }
+  }
+  res.cookie('fav', favs);
+
+  // return fav === 'true';
+};
+
 const renderSight = (req, res) => {
-  res.cookie('name', 'tobi', 'http://localhost:3004/');
-  res.cookie('weight', '230', 'http://localhost:3004/');
+  const { index } = req.params;
+  favCookieHandler(req, res);
+
   read('newSmallData.json', (err, data) => {
-    const { index } = req.params;
+    const chosenObj = data.sightings.filter((x) => x.id === Number(index))[0];
     const obj = {
-      ...data.sightings[index],
+      ...chosenObj,
       index,
       numEntries: data.sightings.length,
+      fav: req.cookies.fav ? req.cookies.fav.indexOf(index) >= 0 : false,
     };
+    console.log(obj);
     [obj.date, obj.time] = splitDateTime(obj.date_time);
+    obj.fromNow = moment(obj.date_time).fromNow();
+    obj.moment = moment(obj.date_time).format('dddd, MMMM Do YYYY, h:mm:ss a');
     res.render('sighting', obj);
   });
+};
+
+const visitorTracker = (req, res) => {
+  let visits = 0;
+  let uniqueVisitors = 0;
+  // check if it's not the first time a request has been made
+  if (req.cookies.visits) {
+    visits = Number(req.cookies.visits); // get the value from the request
+  }
+  if (req.cookies.uniqueVisitors)
+  {
+    uniqueVisitors = Number(req.cookies.uniqueVisitors);
+  }
+  if (visits === 0)
+  {
+    uniqueVisitors += 1;
+  }
+  // set a new value of the cookie
+  visits += 1;
+  // expires visit after everyday
+  res.cookie('visits', visits, { expires: new Date(Date.now() + 24 * 3600000) });
+  // set a new value to send back
+  res.cookie('uniqueVisitors', uniqueVisitors, { expires: new Date(Date.now() + 24 * 30 * 3600000) });
+  return uniqueVisitors;
 };
 
 const renderSights = (req, res) => {
   read('newSmallData.json', (err, data) => {
     const { sightings } = data;
-    sightings.forEach((obj) => { [obj.date, obj.time] = splitDateTime(obj.date_time); });
+    sightings.forEach((obj, index) => {
+      [obj.date, obj.time] = splitDateTime(obj.date_time);
+      obj.fromNow = moment(obj.date_time).fromNow();
+      obj.moment = moment(obj.date_time).format('dddd, MMMM Do YYYY, h:mm:ss a');
+    });
+    data.numVisitors = visitorTracker(req, res);
+
     res.render('index', data);
   });
 };
@@ -119,7 +182,10 @@ const renderEditForm = (req, res) => {
   // read
   read('newSmallData.json', (err, data) => {
     const { index } = req.params;
-    const currObj = data.sightings[index];
+
+    // const currObj = data.sightings[index];
+    const currObj = data.sightings.filter((obj) => obj.id === Number(index))[0];
+    console.log(currObj);
     // date reformatting
     [currObj.date, currObj.time] = currObj.date_time.split('T');
     currObj.date = formatDateString(currObj.date);
@@ -151,6 +217,7 @@ const acceptEdit = (req, res) => {
     data.sightings[index] = {
       ...obj,
       date_time: [obj.date, obj.time].join('T'),
+      id: Number(index),
     };
     console.log('in edit read');
     write('newSmallData.json', data, (err) => {
@@ -192,7 +259,34 @@ const renderOneShape = (req, res) => {
     const { shape } = req.params;
     const { sightings } = data;
     const sights = sightings.filter((x) => x.shape === shape);
-    sights.forEach((obj) => { [obj.date, obj.time] = splitDateTime(obj.date_time); });
+    sights.forEach((obj) => {
+      [obj.date, obj.time] = splitDateTime(obj.date_time);
+      obj.fromNow = moment(obj.date_time).fromNow();
+      obj.moment = moment(obj.date_time).format('dddd, MMMM Do YYYY, h:mm:ss a');
+    });
+    const shapeObjs = {
+      sightings: sights,
+    };
+    res.render('index', shapeObjs);
+  });
+};
+const renderFavs = (req, res) => {
+  read('newSmallData.json', (err, data) => {
+    let fav = [];
+    const { sightings } = data;
+    if (req.cookies.fav) {
+      fav = req.cookies.fav;
+    }
+    console.log(fav);
+
+    const sights = [];
+    fav.forEach((id) => sights.push(sightings[id]));
+
+    sights.forEach((obj) => {
+      [obj.date, obj.time] = splitDateTime(obj.date_time);
+      obj.fromNow = moment(obj.date_time).fromNow();
+      obj.moment = moment(obj.date_time).format('dddd, MMMM Do YYYY, h:mm:ss a');
+    });
     const shapeObjs = {
       sightings: sights,
     };
@@ -212,19 +306,8 @@ app.delete('/sighting/:index/delete', acceptDelete);
 
 app.get('/shapes', renderShapes);
 app.get('/shapes/:shape', renderOneShape);
-app.get('/lala', (req, res) => {
-  let visits = 0;
 
-  // check if it's not the first time a request has been made
-  if (req.cookies.visits) {
-    visits = Number(req.cookies.visits); // get the value from the request
-  }
+app.get('/favs', renderFavs);
 
-  // set a new value of the cookie
-  visits += 1;
-  console.log(req.cookies.visits);
-  res.cookie('visits', visits); // set a new value to send back
-
-  res.send(`Current cookie key and value: visits: ${visits}`);
-});
+app.get('/sighting/:index');
 app.listen(3004);
