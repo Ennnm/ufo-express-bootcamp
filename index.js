@@ -104,8 +104,6 @@ const favCookieHandler = (req, res) => {
     }
   }
   res.cookie('fav', favs);
-
-  // return fav === 'true';
 };
 
 const renderSight = (req, res) => {
@@ -166,6 +164,26 @@ const renderSights = (req, res) => {
   });
 };
 
+const renderPrevSight = (req, res) => {
+  read('newSmallData.json', (err, data) => {
+    const { index } = req.params;
+    const currIdInSghtgs = data.sightings.findIndex((obj) => obj.id === Number(index));
+    if (currIdInSghtgs > 0) {
+      res.redirect(`/sighting/${currIdInSghtgs - 1}`);
+    }
+  });
+};
+
+const rendernextSight = (req, res) => {
+  read('newSmallData.json', (err, data) => {
+    const { index } = req.params;
+    const currIdInSghtgs = data.sightings.findIndex((obj) => obj.id === Number(index));
+    if (currIdInSghtgs < data.sightings.length - 1) {
+      res.redirect(`/sighting/${currIdInSghtgs + 1}`);
+    }
+  });
+};
+
 const formatDateString = (dateStr) => {
   const regex = /(\d{1,2})\/(\d{1,2})\/(\d{2,4})/;
   const found = regex.exec(dateStr);
@@ -182,8 +200,6 @@ const renderEditForm = (req, res) => {
   // read
   read('newSmallData.json', (err, data) => {
     const { index } = req.params;
-
-    // const currObj = data.sightings[index];
     const currObj = data.sightings.filter((obj) => obj.id === Number(index))[0];
     console.log(currObj);
     // date reformatting
@@ -298,6 +314,9 @@ app.post('/sighting', acceptCreation);
 
 app.get('/sighting/:index', renderSight);
 app.get('/', renderSights);
+
+app.get('/sighting/:index/prev', renderPrevSight);
+app.get('/sighting/:index/next', rendernextSight);
 
 app.get('/sighting/:index/edit', renderEditForm);
 app.put('/sighting/:index/edit', acceptEdit);
