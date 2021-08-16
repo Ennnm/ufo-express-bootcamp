@@ -1,0 +1,38 @@
+      <div class="form-row ">
+        <div class="col-md-4  input-group mt-3 mb-3">
+          <span class="input-group-text" >Date:</span>
+          <input type="date" class ="form-control" id="date" name="date" value=<%= date?`${date}`:`0000-00-00`%> />
+        </div>
+        <div class="col-md-4  input-group mt-3 mb-3">
+          <span class="input-group-text" >Time:</span>
+          <input type="time" class ="form-control" id="time" name="time"  value=<%= time?`${time}`:"00:00:00" %> min="00:00"/>
+          </div>
+        <div class="col-md-4  input-group mt-3 mb-3">
+          <span class="input-group-text" >Duration:</span>
+          <input type="text" class ="form-control" id="duration" name="duration" min="0" value ="<%= duration%>" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="col-md-6 input-group mt-3 mb-3">
+          <span class="input-group-text" >City:</span>
+          <input type="text" class ="form-control" id="city" name="city" value ="<%= city %>" />
+           </div>
+        <div class="col-md-6 input-group mt-3 mb-3">
+          <span class="input-group-text" >State:</span>
+          <input type="text" class ="form-control" id="state" name="state" value ="<%= state %>" />
+        </div>
+      </div>
+        <div class="input-group mt-3 mb-3 ">
+          <span class="input-group-text" >Shape:</span>
+          <input type="text" class ="form-control" id="shape" name="shape" value ="<%= shape %>" />
+         </div>
+        <div class="input-group mt-3 mb-3">
+          <span class="input-group-text" >Summary:</span>
+          <textarea class ="form-control" rows ="2" id="summary" name="summary" value="<%= summary %>"><%= summary %></textarea>
+         </div>
+        <div class="input-group mt-3 mb-3">
+        <span class="input-group-text">Text:</span>
+        <textarea class ="form-control" rows ="4" id="text" name="text" value="<%= text %>" ><%= text %></textarea>
+        </div>
+
+        <input class="btn btn-outline-secondary" style="margin-top: 1.6em; margin-bottom: 1.6em" type="submit" value="Submit">

@@ -1,0 +1,59 @@
+<%- include('header', {title:`sighting`}); -%>
+  <body>
+    <%- include('nav'); -%>
+    <div class='container col-10 bg-light border mt-4'>
+      <%- include('sighting-header', {summary, date, time, duration, city, shape}); -%>
+      <p class= "text-justify text-primary"><%=text %></p>
+      <% if(locals.reported){ %>
+        <h6 class="text-primary">Reported: <%= reported%></h6>
+        <% } %>  
+        <script>
+      // Initialize and add the map
+      function initMap() {
+        // The location of Uluru
+        const uluru = { lat: -25.344, lng: 131.036 };
+        // The map, centered at Uluru
+        const map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 4,
+          center: uluru,
+        });
+        // The marker, positioned at Uluru
+        const marker = new google.maps.Marker({
+          position: uluru,
+          map: map,
+        });
+      }
+    </script>
+    <div id="map"></div>
+
+
+    <div class="btn-group">
+    <a href="/sighting/<%=index%>/edit" class="btn btn-outline-secondary btn-sm">Edit</a>
+     <form
+          action="/sighting/<%=index%>/delete?_method=DELETE"
+          method="POST"
+          class="d-inline-block "
+        >
+          <input
+            type="submit"
+            value="Delete"
+            id="delete"
+            class="btn btn-outline-secondary btn-sm"
+           
+          />
+        </form>
+    <a href="/sighting/<%=index %>/prev" class="btn btn-outline-secondary btn-sm">Prev</a>
+    <a href="/sighting/<%=index %>/next" class="btn btn-outline-secondary btn-sm">Next</a>
+    <a href="/sighting/<%=index%>?fav=<%=!fav %>" class="btn btn-outline-secondary btn-sm"
+      <% if(fav){%>
+        style ="color: coral;"
+      <% } %>
+      ><i class="fa fa-star" aria-hidden="true"></i></a>
+    </div>
+    </div>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA55CGjZZP9Yz82YjeR32VCCYU1zeQQPhA&callback=initMap&libraries=&v=weekly"
+      async
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+
+<nav  class="navbar navbar-expand bg-light navbar-light sticky-top border-bottom  ">
+    <ul class= "navbar-nav">
+      <li class="nav-item">
+        <a href="/" class="nav-link">Show All</a>
+      </li>
+      <li class="nav-item">
+        <a href="/shapes" class="nav-link">Shapes</a>
+      </li>
+      <li class="nav-item">
+        <a href="/favs" class="nav-link">Favs</a>
+      </li>
+      <li class="nav-item">
+        <a href="/sighting" class="nav-link">Add</a>
+      </li>
+
+      <% if (locals.numVisitors){ %> 
+      <li class="nav-item ms-auto">
+        <a class="nav-link ">Visitor No.  <%=locals.numVisitors  %> </a>
+       <%  } %> 
+      </li>
+    </ul>
+  </ul>
+</nav>

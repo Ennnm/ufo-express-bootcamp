@@ -1,0 +1,41 @@
+@import "../node_modules/bootstrap/scss/bootstrap.scss";
+// /bootcamp/week5/poce-ufo-sighting-app/node_modules/bootstrap
+// /bootcamp/week5/poce-ufo-sighting-app/public/styles.scss
+nav {
+  /* background-color: #00ff7f; */
+  /* color: #000080;
+  margin-bottom: 1rem; */
+  padding: 0.5rem;
+}
+
+input {
+  width: 100%;
+  box-sizing: border-box;
+  color: #1e90ff;
+  text-overflow: ellipsis;
+}
+
+.form-box {
+  background-color: #000080;
+  padding: 1rem;
+  /* color: silver; */
+  margin: 1rem;
+}
+
+.card:hover {
+  background: darkorange;
+  transform: scale(1.005);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+.card-columns {
+  @include media-breakpoint-only(md) {
+    column-count: 2;
+  }
+  @include media-breakpoint-only(sm) {
+    column-count: 1;
+  }
+}
+body {
+  background-color: black;
+}

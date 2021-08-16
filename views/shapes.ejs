@@ -1,0 +1,10 @@
+<%- include('header', {title: `Shapes`}); -%>
+  <body>
+    <%- include('nav'); -%>
+    <div class="container col-10 bg-light border">
+      <% shapes.forEach((shape, index)=>{%>
+      <a href="/shapes/<%=shape %>" class="btn btn-outline-secondary btn-sm" style="margin:0.2rem"><%=shape %></a>
+      <% }) %>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <title>New Sighting</title>
+  </head>
+  <body>
+    <!-- Bootstrap js -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+    <nav class="text-left">
+      <a href="/">Show All</a>
+      <a href="/shapes">Shapes</a>
+    </nav>
+
+    <% sightings.forEach((sight, index)=>{%>
+    <div class="container col-10 form-box" id="item-<%=index%>">
+      <div class="row">
+        <h1><%=sight.summary%></h1>
+        <h6>Date time: <%=sight.date_time%></h6>
+        <h6>Duration: <%=sight.duration %></h6>
+        <h6>City: <%=sight.city %> State: <%=sight.state %></h6>
+        <h6>Shape: <%=sight.shape %></h6>
+      </div>
+      <div>
+        <a href="/sighting/<%=index%>">Expand</a>
+        <a href="/sighting">Add</a>
+        <a href="/sighting/<%=index%>/edit">Edit</a>
+        <form
+          action="/sighting/<%=index%>/delete?_method=DELETE"
+          method="POST"
+          class="d-inline-block"
+        >
+          <input
+            type="submit"
+            value="Delete"
+            id="delete"
+            style="
+              background: none !important;
+              border: none;
+              padding: 0 !important;
+              /*optional*/
+              font-family: arial, sans-serif;
+              /*input has OS specific font-family*/
+              color: #0d6efd;
+              text-decoration: underline;
+              cursor: pointer;
+            "
+          />
+        </form>
+      </div>
+      <div>
+        <a href="/#item-<%=index-1%>">Prev</a>
+        <a href="/#item-<%=index+1%>">Next</a>
+      </div>
+    </div>
+    <% }) %>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+<%- include('header', {title: title }); -%>
+  <body>
+    <%- include('nav'); -%> 
+      <% if(locals.inputErr===true){ %>       
+        <div class="alert alert-danger alert-dismissible fade show"> 
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <strong>Invalid evidence!</strong> <%=err %>
+        </div>
+      <%   } %> 
+    <div class='container col-10 bg-light border mt-4'>
+      <div class="">
+      <form action=<%=action %> method="POST" >
+        <%- include('form-inputs', {date:locals.date, time:locals.time, duration:locals.duration, city:locals.city, state:locals.state, shape:locals.shape, summary:locals.summary, text:locals.text}); -%>
+      </form>
+      </div>
+  </body>
+</html>
+
+
