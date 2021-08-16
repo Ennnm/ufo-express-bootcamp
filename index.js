@@ -57,27 +57,30 @@ const isInputInvalid = (obj) => {
   }
 };
 const acceptCreation = (req, res) => {
-  const obj = req.body;
-  obj.date_time = [obj.date, obj.time].join('T');
-  obj.reported = new Date();
+  read('newSmallData.json', (err, data) => {
+    const { sightings } = data;
 
-  // date check
-  if (isInputInvalid(obj))
-  {
-    const alertObj = {
-      ...isInputInvalid(obj),
-      title: 'New sighting',
-      action: '/sighting',
-    };
-    res.render('edit', alertObj);
+    const obj = req.body;
+    obj.date_time = [obj.date, obj.time].join('T');
+    obj.reported = new Date();
+    obj.id = sightings.length;
 
-    return;
-  }
+    // date check
+    if (isInputInvalid(obj))
+    {
+      const alertObj = {
+        ...isInputInvalid(obj),
+        title: 'New sighting',
+        action: '/sighting',
+      };
+      res.render('edit', alertObj);
 
-  add('newSmallData.json', 'sightings', obj, (msg) => {
-    read('newSmallData.json', (err, data) => {
-      const { sightings } = data;
-      res.redirect(`/sighting/${sightings.length - 1}`);
+      return;
+    }
+
+    add('newSmallData.json', 'sightings', obj, (msg) => {
+      console.log(msg);
+      res.redirect(`/sighting/${obj.id}`);
     });
   });
 };
