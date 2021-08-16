@@ -1,10 +1,12 @@
 import express from 'express';
 import methodOverride from 'method-override';
+import cookieParser from 'cookie-parser';
 import { read, add, write } from './jsonFileStorage.mjs';
 
 const app = express();
 app.use(methodOverride('_method'));
 app.set('view engine', 'ejs');
+app.use(cookieParser());
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static('public'));
@@ -31,7 +33,7 @@ const isInputInvalid = (obj) => {
   // date check
   const alertObj = {
     ...obj,
-    dateInFuture: true,
+    inputErr: true,
     err: '',
   };
   if (isDateInFuture(obj.date, obj.time))
@@ -66,6 +68,7 @@ const acceptCreation = (req, res) => {
       action: '/sighting',
     };
     res.render('edit', alertObj);
+
     return;
   }
 
@@ -78,6 +81,8 @@ const acceptCreation = (req, res) => {
 };
 
 const renderSight = (req, res) => {
+  res.cookie('name', 'tobi', 'http://localhost:3004/');
+  res.cookie('weight', '230', 'http://localhost:3004/');
   read('newSmallData.json', (err, data) => {
     const { index } = req.params;
     const obj = {
@@ -207,5 +212,19 @@ app.delete('/sighting/:index/delete', acceptDelete);
 
 app.get('/shapes', renderShapes);
 app.get('/shapes/:shape', renderOneShape);
+app.get('/lala', (req, res) => {
+  let visits = 0;
 
+  // check if it's not the first time a request has been made
+  if (req.cookies.visits) {
+    visits = Number(req.cookies.visits); // get the value from the request
+  }
+
+  // set a new value of the cookie
+  visits += 1;
+  console.log(req.cookies.visits);
+  res.cookie('visits', visits); // set a new value to send back
+
+  res.send(`Current cookie key and value: visits: ${visits}`);
+});
 app.listen(3004);
