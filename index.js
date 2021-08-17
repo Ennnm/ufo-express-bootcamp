@@ -142,10 +142,6 @@ const visitorTracker = (req, res) => {
   if (req.cookies.visits) {
     visits = Number(req.cookies.visits); // get the value from the request
   }
-  if (req.cookies.uniqueVisitors)
-  {
-    uniqueVisitors = Number(req.cookies.uniqueVisitors);
-  }
   if (visits === 0)
   {
     uniqueVisitors += 1;
