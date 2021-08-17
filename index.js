@@ -12,7 +12,6 @@ app.use(cookieParser());
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static('public'));
-// overrid POST req with query param ?_method=PUT to be PUT requests
 
 const splitDateTime = (dateTime) => dateTime.split('T');
 const isDateInFuture = (date, time) => {
@@ -338,4 +337,6 @@ app.get('/shapes/:shape', renderOneShape);
 app.get('/favs', renderFavs);
 
 app.get('/sighting/:index');
-app.listen(3004);
+
+// app.listen(3004);
+app.listen(process.argv[2]);
