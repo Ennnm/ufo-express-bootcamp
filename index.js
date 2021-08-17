@@ -134,9 +134,10 @@ const renderSight = (req, res) => {
   });
 };
 
+let uniqueVisitors = 0;
 const visitorTracker = (req, res) => {
   let visits = 0;
-  let uniqueVisitors = 0;
+
   // check if it's not the first time a request has been made
   if (req.cookies.visits) {
     visits = Number(req.cookies.visits); // get the value from the request
