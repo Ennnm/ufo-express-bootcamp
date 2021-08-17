@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import moment from 'moment';
 import { read, add, write } from './jsonFileStorage.mjs';
 
+const JSONFILENAME = 'newSmallData.json';
 const app = express();
 app.use(methodOverride('_method'));
 app.set('view engine', 'ejs');
@@ -57,7 +58,7 @@ const isInputInvalid = (obj) => {
   }
 };
 const acceptCreation = (req, res) => {
-  read('newSmallData.json', (err, data) => {
+  read(JSONFILENAME, (err, data) => {
     const { sightings } = data;
 
     const obj = req.body;
@@ -78,7 +79,7 @@ const acceptCreation = (req, res) => {
       return;
     }
 
-    add('newSmallData.json', 'sightings', obj, (msg) => {
+    add(JSONFILENAME, 'sightings', obj, (msg) => {
       console.log(msg);
       res.redirect(`/sighting/${obj.id}`);
     });
@@ -113,7 +114,7 @@ const renderSight = (req, res) => {
   const { index } = req.params;
   favCookieHandler(req, res);
 
-  read('newSmallData.json', (err, data) => {
+  read(JSONFILENAME, (err, data) => {
     const chosenObj = data.sightings.filter((x) => x.id === Number(index))[0];
     const obj = {
       ...chosenObj,
@@ -125,6 +126,11 @@ const renderSight = (req, res) => {
     [obj.date, obj.time] = splitDateTime(obj.date_time);
     obj.fromNow = moment(obj.date_time).fromNow();
     obj.moment = moment(obj.date_time).format('dddd, MMMM Do YYYY, h:mm:ss a');
+
+    if (Number(obj.city_latitude) !== 0
+      && Number(obj.city_longitude) !== 0) {
+      obj.lat = Number(obj.city_latitude).toFixed(3);
+      obj.long = Number(obj.city_longitude).toFixed(3); }
     res.render('sighting', obj);
   });
 };
@@ -154,9 +160,9 @@ const visitorTracker = (req, res) => {
 };
 
 const renderSights = (req, res) => {
-  read('newSmallData.json', (err, data) => {
+  read(JSONFILENAME, (err, data) => {
     const { sightings } = data;
-    sightings.forEach((obj, index) => {
+    sightings.forEach((obj) => {
       [obj.date, obj.time] = splitDateTime(obj.date_time);
       obj.fromNow = moment(obj.date_time).fromNow();
       obj.moment = moment(obj.date_time).format('dddd, MMMM Do YYYY, h:mm:ss a');
@@ -168,7 +174,7 @@ const renderSights = (req, res) => {
 };
 
 const renderPrevSight = (req, res) => {
-  read('newSmallData.json', (err, data) => {
+  read(JSONFILENAME, (err, data) => {
     const { index } = req.params;
     const currIdInSghtgs = data.sightings.findIndex((obj) => obj.id === Number(index));
     if (currIdInSghtgs > 0) {
@@ -178,7 +184,7 @@ const renderPrevSight = (req, res) => {
 };
 
 const rendernextSight = (req, res) => {
-  read('newSmallData.json', (err, data) => {
+  read(JSONFILENAME, (err, data) => {
     const { index } = req.params;
     const currIdInSghtgs = data.sightings.findIndex((obj) => obj.id === Number(index));
     if (currIdInSghtgs < data.sightings.length - 1) {
@@ -201,7 +207,7 @@ const formatDateString = (dateStr) => {
 };
 const renderEditForm = (req, res) => {
   // read
-  read('newSmallData.json', (err, data) => {
+  read(JSONFILENAME, (err, data) => {
     const { index } = req.params;
     const currObj = data.sightings.filter((obj) => obj.id === Number(index))[0];
     console.log(currObj);
@@ -232,14 +238,14 @@ const acceptEdit = (req, res) => {
     res.render('edit', alertObj);
     return;
   }
-  read('newSmallData.json', (err, data) => {
+  read(JSONFILENAME, (err, data) => {
     data.sightings[index] = {
       ...obj,
       date_time: [obj.date, obj.time].join('T'),
       id: Number(index),
     };
     console.log('in edit read');
-    write('newSmallData.json', data, (err) => {
+    write(JSONFILENAME, data, (err) => {
       if (err) console.log('write error');
       console.log('in edit write');
       console.log(data.sightings[index]);
@@ -250,11 +256,11 @@ const acceptEdit = (req, res) => {
 };
 
 const acceptDelete = (req, res) => {
-  read('newSmallData.json', (err, data) => {
+  read(JSONFILENAME, (err, data) => {
     const { index } = req.params;
     data.sightings.splice(index, 1);
     console.log(index);
-    write('newSmallData.json', data, (err) => {
+    write(JSONFILENAME, data, (err) => {
       if (err) console.log('write error');
       res.redirect('/');
     });
@@ -262,7 +268,7 @@ const acceptDelete = (req, res) => {
 };
 
 const renderShapes = (req, res) => {
-  read('newSmallData.json', (err, data) => {
+  read(JSONFILENAME, (err, data) => {
     const { sightings } = data;
     let shapeArr = sightings.map((sight) => sight.shape);
     shapeArr = shapeArr.filter((shape) => shape !== '');
@@ -274,7 +280,7 @@ const renderShapes = (req, res) => {
 };
 
 const renderOneShape = (req, res) => {
-  read('newSmallData.json', (err, data) => {
+  read(JSONFILENAME, (err, data) => {
     const { shape } = req.params;
     const { sightings } = data;
     const sights = sightings.filter((x) => x.shape === shape);
@@ -290,7 +296,7 @@ const renderOneShape = (req, res) => {
   });
 };
 const renderFavs = (req, res) => {
-  read('newSmallData.json', (err, data) => {
+  read(JSONFILENAME, (err, data) => {
     let fav = [];
     const { sightings } = data;
     if (req.cookies.fav) {

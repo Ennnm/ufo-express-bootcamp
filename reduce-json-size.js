@@ -7,7 +7,7 @@ read('newbigdata.json', (err, data) => {
     obj.id = index;
     console.log(index);
   });
-  write('newSmallData.json', data, (err, content) => {
+  write('newSmallData.json', data, (err) => {
     console.log(err);
   });
 });

@@ -7,25 +7,25 @@
       <% if(locals.reported){ %>
         <h6 class="text-primary">Reported: <%= reported%></h6>
         <% } %>  
-        <script>
-      // Initialize and add the map
+        
+    <% if(locals.lat && locals.long) { %>
+    <script>
       function initMap() {
-        // The location of Uluru
-        const uluru = { lat: -25.344, lng: 131.036 };
-        // The map, centered at Uluru
+        // The location of Uluru 
         const map = new google.maps.Map(document.getElementById("map"), {
           zoom: 4,
-          center: uluru,
+          center: new google.maps.LatLng(<%=lat%>, <%=long%>),
         });
         // The marker, positioned at Uluru
         const marker = new google.maps.Marker({
-          position: uluru,
+          position: new google.maps.LatLng(<%=lat%>, <%=long%>),
           map: map,
         });
       }
     </script>
-    <div id="map"></div>
 
+    <div id="map"><%= lat%>, <%= long%></div>
+    <% } %>
 
     <div class="btn-group">
     <a href="/sighting/<%=index%>/edit" class="btn btn-outline-secondary btn-sm">Edit</a>
